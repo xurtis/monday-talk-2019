@@ -79,4 +79,25 @@ themes!{
         let green = unimplemented!();
         Color { red, green, blue }
     };
+    ["royal"; 512] = |steps, _| {
+        match steps {
+            512 => Color { red: 0, blue: 0, green: 0 },
+            steps if steps < 256 => {
+                let steps = steps as u8;
+                Color {
+                    blue: 0xFF - steps,
+                    red: 0x80,
+                    green: 0x28,
+                }
+            }
+            steps => {
+                let steps = (steps - 256) as u8;
+                Color {
+                    blue: 0,
+                    red: 0x80 + (steps / 2),
+                    green: 0x28,
+                }
+            }
+        }
+    }
 }
