@@ -4,15 +4,15 @@ use num::complex::Complex;
 //
 // These show up in the 'imports' for the WASM
 extern "C" {
-    fn canvas_width() -> u64;
+    fn canvas_width() -> u32;
 
-    fn canvas_height() -> u64;
+    fn canvas_height() -> u32;
 
-    fn draw_pixel(x: u64, y: u64, color: u32);
+    fn draw_pixel(x: u32, y: u32, color: u32);
 
-    fn color_pixel(steps: u64, x: f64, y: f64) -> u32;
+    fn color_pixel(steps: u32, x: f64, y: f64) -> u32;
 
-    fn max_steps() -> u64;
+    fn max_steps() -> u32;
 }
 
 #[no_mangle]
@@ -25,8 +25,8 @@ pub extern fn render(x: f64, y: f64, zoom: u32) {
     for pixel_y in 0..height {
         for pixel_x in 0..width {
             let c = Complex::new(
-                x + (((pixel_x as i64) - ((width as i64)/2)) as f64) * distance,
-                y + (((pixel_y as i64) - ((height as i64)/2)) as f64) * distance,
+                x + (((pixel_x as i32) - ((width as i32)/2)) as f64) * distance,
+                y + (((pixel_y as i32) - ((height as i32)/2)) as f64) * distance,
             );
             let mut z = Complex::new(0f64, 0f64);
             let mut steps = 0;

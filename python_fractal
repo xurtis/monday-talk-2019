@@ -27,6 +27,7 @@ class Theme:
         """
         return self._instance.exports['color_pixel'](steps, x, y)
 
+    @property
     def max_steps(self):
         """
         The maximum number of steps to render for the theme.
@@ -125,7 +126,7 @@ class Mandelbrot(Fractal):
         width = self._canvas.width
         height = self._canvas.height
         distance = 1 / (1 << zoom)
-        max_steps = self._theme.max_steps()
+        max_steps = self._theme.max_steps
 
         for pixel_y in range(height):
             for pixel_x in range(width):
@@ -160,20 +161,20 @@ class Wasm(Fractal):
 
     @staticmethod
     def _build_imports(canvas, theme):
-        def canvas_width() -> 'i64':
+        def canvas_width() -> 'i32':
             return canvas.width
 
-        def canvas_height() -> 'i64':
+        def canvas_height() -> 'i32':
             return canvas.height
 
-        def draw_pixel(x: 'i64', y: 'i64', color: 'i32'):
+        def draw_pixel(x: 'i32', y: 'i32', color: 'i32'):
             canvas.draw(x, y, color)
 
-        def color_pixel(steps: 'i64', x: 'f64', y: 'f64') -> 'i32':
+        def color_pixel(steps: 'i32', x: 'f64', y: 'f64') -> 'i32':
             return theme.color_pixel(steps, x, y)
 
-        def max_steps() -> 'i64':
-            return theme.max_steps()
+        def max_steps() -> 'i32':
+            return theme.max_steps
 
         return {
             'env': {

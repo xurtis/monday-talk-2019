@@ -1,7 +1,7 @@
 //! Simple theming function for the fractal generator
 
 /// The number of steps to render
-pub type Steps = u64;
+pub type Steps = u32;
 
 /// A point in the cartesian plane of reals
 #[repr(C)]
@@ -26,12 +26,12 @@ impl Into<u32> for Color {
 }
 
 #[no_mangle]
-pub extern fn color_pixel(steps: u64, x: f64, y: f64) -> u32 {
+pub extern fn color_pixel(steps: u32, x: f64, y: f64) -> u32 {
     color_pixel_impl(steps, Point { x, y }).into()
 }
 
 #[no_mangle]
-pub extern fn max_steps() -> u64 {
+pub extern fn max_steps() -> u32 {
     max_steps_impl()
 }
 
@@ -42,7 +42,7 @@ macro_rules! themes {
             {$value(steps, point)}
         )*}
 
-        fn max_steps_impl() -> u64 {$(
+        fn max_steps_impl() -> u32 {$(
             #[cfg(feature = $name)]
             {$steps}
         )*}
