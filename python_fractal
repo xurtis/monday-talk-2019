@@ -49,6 +49,7 @@ class Fractal:
 class Canvas:
 
     def __init__(self):
+        self._progress = 0
         self._window = tkinter.Tk()
         self._canvas = tkinter.Canvas(self._window)
         self._canvas.pack(fill="both", expand=True)
@@ -81,6 +82,9 @@ class Canvas:
 
     def draw(self, x, y, color):
         "Set the pixel at (x, y) to the provided BGR color"
+        if y < self._progress or y - self._progress > (self.height / 20):
+            print(f"{y/self.height:4.0%}")
+            self._progress = y
         color = Canvas._convert_color(color)
         self._image.putpixel((x, y), color)
 
@@ -122,7 +126,6 @@ class Mandelbrot(Fractal):
         height = self._canvas.height
         distance = 1 / (1 << zoom)
         max_steps = self._theme.max_steps()
-        print(f"{x} {y} {distance}")
 
         for pixel_y in range(height):
             for pixel_x in range(width):
@@ -138,7 +141,6 @@ class Mandelbrot(Fractal):
 
                 color = self._theme.color_pixel(steps, c.real, c.imag)
                 self._canvas.draw(pixel_x, pixel_y, color)
-            print(f"Y: {pixel_y}/{height}")
 
         self._canvas.refresh()
 
@@ -152,12 +154,12 @@ class Wasm(Fractal):
         self._theme = theme
 
         wasm_bytes = open(path, 'rb').read()
-        imports = Fractal._build_imports(canvas, theme)
+        imports = Wasm._build_imports(canvas, theme)
         result = instantiate(wasm_bytes, imports)
         self._instance = result.instance
 
     @staticmethod
-    def _build_imports(self, canvas, theme):
+    def _build_imports(canvas, theme):
         def canvas_width() -> 'i64':
             return canvas.width
 
