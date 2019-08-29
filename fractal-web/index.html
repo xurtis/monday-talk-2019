@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Mandelbrot</title>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+	<body>
+		<div class="app">
+			<h1>Mandelbrot Viewer</h1>
+			<canvas width="100"></canvas>
+			<form>
+				<div class="input-row">
+					<div class="input">
+						<label for="x">X position</label>
+						<input type="text" name="x" value="-1.522303068459152"/>
+					</div>
+					<div class="input">
+						<label for="y">Y position</label>
+						<input type="text" name="y" value="0.005115452548480"/>
+					</div>
+					<div class="input">
+						<label for="zoom">Zoom</label>
+						<input
+							type="range"
+							name="zoom"
+							value="35"
+							min="8"
+							max="64"
+						/>
+					</div>
+				</div>
+				<div class="input-row">
+					<div class="input">
+						<label for="mandelbrot">Mandelbrot WASM</label>
+						<input type="file" name="mandelbrot" accept="application/wasm"/>
+					</div>
+					<div class="input">
+						<label for="theme">Theme</label>
+						<input type="file" name="theme" accept="application/wasm"/>
+					</div>
+				</div>
+				<div class="render-row">
+					<input type="button" name="native" value="Render Native"/>
+					<input type="button" name="wasm" value="Render WASM"/>
+				</div>
+			</form>
+		</div>
+		<script src="main.js" type="text/javascript"></script>
+	</body>
+</html>
