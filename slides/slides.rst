@@ -10,12 +10,15 @@ What is WASM?
 
 WebAssembly (WASM) is a specification of a stack machine.
 
-* Compiles to native machine code at runtime
-* Guarantees a number of safety and security properties
-* Embeds into other languages or systems via a runtime
-* Provides low-overhead and portable foreign-function interface
-* Allows a single compiled module to be used in any context
-* Does not need to be rebuilt for specific architectures or platforms
+* Works in a wide variety of systems
+  * Embeds into other languages or systems via a runtime
+  * Allows a single compiled module to be used in any context
+  * Does not need to be rebuilt for specific architectures or platforms
+* High performance
+  * Compiles to native machine code at runtime
+  * Provides low-overhead and portable foreign-function interface
+* Minimal trust requirements
+  * Guarantees a number of safety and security properties
 
 What does WASM look like?
 =========================
@@ -30,8 +33,8 @@ Rust source
        a + b
    }
 
-Compiled WASM
--------------
+Compiled WAT (WebAssembly Text)
+-------------------------------
 
 .. code:: wat
 
@@ -73,6 +76,7 @@ Portability
 * Can load multiple modules into the same address space/runtime
   * Low switching overhead
   * Better hardware utilisation
+* Use like libraries or lightweight processes
 
 Security & Trust
 ================
@@ -203,11 +207,11 @@ WASM in the future
 
 * Standard WASM runtime interface (WASI)
 * Interface types (automatic interface generation)
-* Threads & atomic primitives
+* Threads, atomic primitives, and safe concurrent data access
 * Garbage collected data
-* Reference types
+* Reference types (``anyref``)
 * Explicit tail call
-* SIMD
+* Simultaneous Instruction, Multiple Data (SIMD) operations
 
 More references
 ===============
