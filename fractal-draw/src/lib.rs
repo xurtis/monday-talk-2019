@@ -24,8 +24,8 @@ pub extern fn render(center_re: f64, center_im: f64, zoom: u32) {
     let (width, height) = canvas_dimensions();
     let distance = 1f64 / ((1u64 << zoom) as f64);
 
-    for pixel_y in 0u32..height {
-        for pixel_x in 0u32..width {
+    for pixel_y in 0i32..height {
+        for pixel_x in 0i32..width {
             let re = (pixel_x - width/2) as f64;
             let im = (pixel_y - height/2) as f64;
             let c = Complex::new(
@@ -39,7 +39,7 @@ pub extern fn render(center_re: f64, center_im: f64, zoom: u32) {
     unsafe { paint(); }
 }
 
-fn draw_steps(pixel_x: u32, pixel_y: u32, c: Complex<f64>) {
+fn draw_steps(pixel_x: i32, pixel_y: i32, c: Complex<f64>) {
     let mut z = Complex::new(0f64, 0f64);
     let mut steps = 0;
     let max_steps = unsafe { max_steps() };
@@ -49,17 +49,17 @@ fn draw_steps(pixel_x: u32, pixel_y: u32, c: Complex<f64>) {
     }
     unsafe {
         draw_pixel(
-            pixel_x,
-            pixel_y,
+            pixel_x as u32,
+            pixel_y as u32,
             color_pixel(steps, c.re, c.im)
         );
     }
 }
 
-fn canvas_dimensions() -> (u32, u32) {
-    unsafe { (canvas_width(), canvas_height()) }
+fn canvas_dimensions() -> (i32, i32) {
+    unsafe { (canvas_width() as i32, canvas_height() as i32) }
 }
 
-fn show_progress(pixel_y: u32, height: u32) {
+fn show_progress(pixel_y: i32, height: i32) {
     unsafe { progress((pixel_y as f64) / (height as f64)); }
 }
