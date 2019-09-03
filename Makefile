@@ -13,6 +13,21 @@ build/slides.pdf: slides/slides.rst
 		-i $(notdir $<) \
 		-o $(abspath $@)
 
+# Code preview
+# ============
+
+VISUAL ?= nvim
+VISUAL_TABS ?= -p
+
+.PHONY: code
+code: \
+	fractal-theme/src/lib.rs \
+	fractal-draw/src/lib.rs \
+	python_fractal \
+	fractal-web/worker.js \
+	fractal-web/main.js
+	${VISUAL} ${VISUAL_TABS} $^
+
 # Build WASM modules
 # ==================
 
