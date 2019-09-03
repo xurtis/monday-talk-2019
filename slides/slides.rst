@@ -50,9 +50,11 @@ WASM data, types, & references
 ==============================
 
 * Four basic data types: ``i32``, ``i64``, ``f32``, & ``f64``
-* Instructions operate on the stack (not addressable), linear memories
-  (addressable) for data, tables (addressable) for indirect function
-  call, and global index spaces for global constants
+* Instructions operate on a non-addressable stack,
+* Data can be loaded onto the stack from linear memories or global index
+  spaces
+* Data can be stored into linear memories
+* Functions can be called by name or indirectly through tables
 * Runtime passes data via the linear memories and functions via tables
 * Everything is bundled into 'modules'
 
@@ -193,10 +195,10 @@ Mandelbrot
 Where can I use WASM now?
 =========================
 
-* Supported in major browsers (Chrome, Firefox, Edge, Safari, etc.)
-* Supported in the cloud (Cloudflare Workers, AWS Lambda)
-* Language runtimes (wasmtime[1]_ & wasmer[2]_ for Rust, Python, C/C++,
-  Go, PHP, Ruby, Postgres, .NET, R, Swift, & POSIX)
+* Major browsers (Chrome, Firefox, Edge, Safari, etc.)
+* Content Delivery Networks (Cloudflare Workers, AWS Lambda)
+* Language runtime embeddings (wasmtime[1]_ & wasmer[2]_ for Rust,
+  Python, C/C++, Go, PHP, Ruby, Postgres, .NET, R, Swift, & POSIX)
 
 .. [1] https://github.com/CraneStation/wasmtime
 
