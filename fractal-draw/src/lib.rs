@@ -20,28 +20,46 @@ extern "C" {
 }
 
 #[no_mangle]
-pub extern fn render(x: f64, y: f64, zoom: u32) {
-    let width = unsafe { canvas_width() };
-    let height = unsafe { canvas_height() };
+pub extern fn render(center_re: f64, center_im: f64, zoom: u32) {
+    let (width, height) = canvas_dimensions();
     let distance = 1f64 / ((1u64 << zoom) as f64);
-    let max_steps = unsafe { max_steps() };
 
-    for pixel_y in 0..height {
-        for pixel_x in 0..width {
+    for pixel_y in 0u32..height {
+        for pixel_x in 0u32..width {
+            let re = (pixel_x - width/2) as f64;
+            let im = (pixel_y - height/2) as f64;
             let c = Complex::new(
-                x + (((pixel_x as i32) - ((width as i32)/2)) as f64) * distance,
-                y + (((pixel_y as i32) - ((height as i32)/2)) as f64) * distance,
+                center_re + re * distance,
+                center_im + im * distance,
             );
-            let mut z = Complex::new(0f64, 0f64);
-            let mut steps = 0;
-            while z.norm_sqr() < 4.0 && steps < max_steps {
-                z = z * z + c;
-                steps += 1;
-            }
-            unsafe { draw_pixel(pixel_x, pixel_y, color_pixel(steps, c.re, c.im)); }
+            draw_steps(pixel_x, pixel_y, c);
         }
-        unsafe { progress((pixel_y as f64) / (height as f64)); }
+        show_progress(pixel_y, height);
     }
-
     unsafe { paint(); }
+}
+
+fn draw_steps(pixel_x: u32, pixel_y: u32, c: Complex<f64>) {
+    let mut z = Complex::new(0f64, 0f64);
+    let mut steps = 0;
+    let max_steps = unsafe { max_steps() };
+    while z.norm_sqr() < 4.0 && steps < max_steps {
+        z = z * z + c;
+        steps += 1;
+    }
+    unsafe {
+        draw_pixel(
+            pixel_x,
+            pixel_y,
+            color_pixel(steps, c.re, c.im)
+        );
+    }
+}
+
+fn canvas_dimensions() -> (u32, u32) {
+    unsafe { (canvas_width(), canvas_height()) }
+}
+
+fn show_progress(pixel_y: u32, height: u32) {
+    unsafe { progress((pixel_y as f64) / (height as f64)); }
 }
