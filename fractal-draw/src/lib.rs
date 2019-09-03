@@ -12,7 +12,11 @@ extern "C" {
 
     fn color_pixel(steps: u32, x: f64, y: f64) -> u32;
 
+    fn paint();
+
     fn max_steps() -> u32;
+
+    fn progress(progress: f64);
 }
 
 #[no_mangle]
@@ -36,5 +40,8 @@ pub extern fn render(x: f64, y: f64, zoom: u32) {
             }
             unsafe { draw_pixel(pixel_x, pixel_y, color_pixel(steps, c.re, c.im)); }
         }
+        unsafe { progress((pixel_y as f64) / (height as f64)); }
     }
+
+    unsafe { paint(); }
 }

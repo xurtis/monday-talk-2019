@@ -15,8 +15,8 @@ h1 {
 
 canvas {
 	background-color: #000000;
-	border: 2px solid #efefef;
 	margin: 8px auto;
+	box-sizing: border-box;
 	width: 100%;
 }
 
@@ -60,4 +60,18 @@ canvas {
 .render-row input {
 	margin: 4px;
 	font-size: 1.2em;
+}
+
+.progress {
+	margin: 4px;
+	border-radius: 4px;
+	background-color: #000000;
+	overflow: hidden;
+	height: 1em;
+}
+
+.progress > .bar {
+	background-color: #4F9FFF;
+	height: 100%;
+	width: 0%;
 }

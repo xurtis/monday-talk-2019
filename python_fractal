@@ -7,8 +7,11 @@ Fractal generator using WASM
 from sys import argv, exit
 from wasmtime import instantiate
 import tkinter
+from tkinter.ttk import Progressbar
 from PIL import Image, ImageTk
 from time import sleep, time
+from threading import Thread
+from queue import Queue
 
 class Theme:
     """
@@ -61,9 +64,12 @@ class Canvas:
             image=self._photo,
             anchor="nw",
         )
+        self._progress = Progressbar(self._window)
+        self._progress.pack(fill="x", side="bottom")
         self.bind("c", lambda e: self._clear())
         self.bind("q", lambda e: self._window.quit())
         self.bind("s", lambda e: self._image.show())
+        self.after(self._clear)
 
     @property
     def width(self):
@@ -83,9 +89,6 @@ class Canvas:
 
     def draw(self, x, y, color):
         "Set the pixel at (x, y) to the provided BGR color"
-        if y < self._progress or y - self._progress > (self.height / 20):
-            print(f"{y/self.height:4.0%}")
-            self._progress = y
         color = Canvas._convert_color(color)
         self._image.putpixel((x, y), color)
 
@@ -104,6 +107,12 @@ class Canvas:
         self._image = Image.new("RGB", (self.width, self.height))
         self._photo = ImageTk.PhotoImage(self._image)
         self._canvas.itemconfig(self._img_area, image=self._photo)
+
+    def show_progress(self, progress):
+        self._progress['value'] = progress * 100.0
+
+    def after(self, function):
+        self._window.after(100, function)
 
     @staticmethod
     def _convert_color(color):
@@ -129,6 +138,7 @@ class Mandelbrot(Fractal):
         max_steps = self._theme.max_steps
 
         for pixel_y in range(height):
+            self._canvas.show_progress(pixel_y / height)
             for pixel_x in range(width):
                 c = complex(
                     x + (pixel_x - (width/2)) * distance,
@@ -173,8 +183,14 @@ class Wasm(Fractal):
         def color_pixel(steps: 'i32', x: 'f64', y: 'f64') -> 'i32':
             return theme.color_pixel(steps, x, y)
 
+        def paint():
+            canvas.refresh()
+
         def max_steps() -> 'i32':
             return theme.max_steps
+
+        def progress(progress: 'f64'):
+            canvas.show_progress(progress)
 
         return {
             'env': {
@@ -182,22 +198,99 @@ class Wasm(Fractal):
                 'canvas_height': canvas_height,
                 'draw_pixel': draw_pixel,
                 'color_pixel': color_pixel,
+                'paint': paint,
                 'max_steps': max_steps,
+                'progress': progress,
             }
         }
 
     def render(self, x, y, zoom):
         self._instance.exports['render'](x, y, zoom)
-        self._canvas.refresh()
 
 def bench(name, action):
-    def handler(event):
-        start = time()
-        action()
-        end = time()
-        duration = end - start
-        print(f"{name}: {duration:.6f} seconds")
-    return handler
+    start = time()
+    action()
+    end = time()
+    duration = end - start
+    print(f"{name}: {duration:.6f} seconds")
+
+class RenderThread(Thread):
+
+    def __init__(self, canvas):
+        super().__init__()
+        self._render_queue = Queue()
+        self._ui_queue = Queue()
+        self._canvas = canvas
+        self._live = True
+        self._theme = None
+        self._wasm = None
+
+    def run(self):
+        while (self._live):
+            self._render_event(self._render_queue.get())
+
+    def _render_event(self, message):
+        if message["type"] == "wasm":
+            self._wasm = message["wasm"]
+        elif message["type"] == "theme":
+            self._theme = message["theme"]
+        elif message["type"] == "render_native":
+            native = Mandelbrot(self._canvas, self._theme)
+            del message["type"]
+            bench(
+                'Native Mandelbrot Set',
+                lambda: native.render(**message),
+            )
+        elif message["type"] == "render_wasm":
+            del message["type"]
+            bench(
+                'WASM Mandelbrot Set',
+                lambda: self._wasm.render(**message),
+            )
+        elif message["type"] == "quit":
+            self._live = False
+
+    def handle_ui_events(self):
+        while not self._ui_queue.empty():
+            self._ui_event(self._ui_queue.get_nowait())
+        self._canvas.after(self.handle_ui_events)
+
+    def _ui_event(message):
+        if message["type"] == "progress":
+            self._canvas.show_progress(message["progress"])
+        elif message["type"] == "paint":
+            self._canvas.refresh()
+
+    def set_wasm(self, wasm_file):
+        self._render_queue.put({
+            "type": "wasm",
+            "wasm": wasm_file,
+        })
+
+    def set_theme(self, theme_file):
+        self._render_queue.put({
+            "type": "theme",
+            "theme": theme_file,
+        })
+
+    def render_native(self, x, y, zoom):
+        self._render_queue.put({
+            "type": "render_native",
+            "x": x,
+            "y": y,
+            "zoom": zoom,
+        })
+
+    def render_wasm(self, x, y, zoom):
+        self._render_queue.put({
+            "type": "render_wasm",
+            "x": x,
+            "y": y,
+            "zoom": zoom,
+        })
+
+    def quit(self):
+        self._render_queue.put({ "type": "quit" })
 
 if __name__ == "__main__":
     if len(argv) != 6:
@@ -211,20 +304,14 @@ if __name__ == "__main__":
     zoom = int(argv[5])
 
     canvas = Canvas()
+    render_thread = RenderThread(canvas)
+    render_thread.set_theme(theme)
+    render_thread.set_wasm(Wasm(wasm_path, canvas, theme))
+    render_thread.start()
+    render_thread.handle_ui_events()
 
-    native = Mandelbrot(canvas, theme)
-    draw_native = bench(
-        'Native Mandelbrot Set',
-        lambda: native.render(x, y, zoom),
-    )
-    canvas.bind('n', draw_native)
-
-    wasm = Wasm(wasm_path, canvas, theme)
-    draw_wasm = bench(
-        'WASM Mandelbrot Set',
-        lambda: wasm.render(x, y, zoom),
-    )
-    canvas.bind('w', draw_wasm)
+    canvas.bind('n', lambda _: render_thread.render_native(x, y, zoom))
+    canvas.bind('w', lambda _: render_thread.render_wasm(x, y, zoom))
 
     canvas.mainloop()
-
+    render_thread.quit()
