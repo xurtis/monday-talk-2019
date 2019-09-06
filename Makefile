@@ -3,13 +3,19 @@
 
 PDFVIEW ?= evince
 
+ifdef BEAMER_THEME
+PDFTHEME = -V theme:${BEAMER_THEME}
+endif
+
 .PHONY: slides
 slides: build/slides.pdf
 	${PDFVIEW} $<
 
 build/slides.pdf: slides/slides.rst
+	mkdir -p build
 	cd $(dir $<) && pandoc \
 		-t beamer \
+		${PDFTHEME} \
 		-i $(notdir $<) \
 		-o $(abspath $@)
 
@@ -100,3 +106,10 @@ python-demo: ${RENDER} ${PYTHON_THEME} ${PYTHON_WASMTIME}
 		${PYTHON_THEME} \
 		${RENDER} \
 		${RE} ${IM} ${ZOOM}
+
+# Clean
+# =====
+
+.PHONY: clean
+clean:
+	rm -rf build
