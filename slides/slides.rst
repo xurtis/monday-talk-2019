@@ -112,7 +112,7 @@ Theme
 
    #[no_mangle]
    pub extern
-   fn color_pixel(steps: u32, _re: f64, _im: f64) -> u32 {
+   fn color_pixel(steps: u32, re: f64, im: f64) -> u32 {
        let level = steps as u8;
        let color = Color {
            red: level,
@@ -126,9 +126,6 @@ Theme
    pub extern fn max_steps() -> u32 { 256 }
 
 ----
-
-Mandelbrot
-----------
 
 .. code:: rust
 
