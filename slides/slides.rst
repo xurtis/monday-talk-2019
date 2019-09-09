@@ -50,13 +50,23 @@ WASM data, types, & references
 ==============================
 
 * Four basic data types: ``i32``, ``i64``, ``f32``, & ``f64``
-* Instructions operate on a non-addressable stack,
-* Data can be loaded onto the stack from linear memories or global index
-  spaces
-* Data can be stored into linear memories
-* Functions can be called by name or indirectly through tables
+* Everything is bundled into a 'module'
+  * Directly refrenced functions
+  * Indexable globals region (for immutable single values)
+  * Indexable linear memory (for mutable, structured, and shared data)
+  * Indexable function tables (for external and indirect function calls)
+* Instructions operate on a stack,
+  * Variables pased as operands to functions and instructions
+  * Function frames & locals
+  * Block scope
 * Runtime passes data via the linear memories and functions via tables
-* Everything is bundled into 'modules'
+
+----
+
+.. image:: layout.svg
+
+..
+   Layout of runtime layout of a WASM module
 
 Portability
 ===========
@@ -78,7 +88,7 @@ Portability
 * Can load multiple modules into the same address space/runtime
   * Low switching overhead
   * Better hardware utilisation
-* Use like libraries or lightweight processes
+* Used like libraries or lightweight processes
 
 Security & Trust
 ================
@@ -220,3 +230,4 @@ More references
 * Mozilla Developer Network: https://developer.mozilla.org/en-US/docs/WebAssembly
 * WebAssembly Rocks: http://www.wasmrocks.com/
 * Even more references: https://github.com/mbasso/awesome-wasm
+

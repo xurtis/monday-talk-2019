@@ -11,7 +11,7 @@ endif
 slides: build/slides.pdf
 	${PDFVIEW} $<
 
-build/slides.pdf: slides/slides.rst
+build/slides.pdf: slides/slides.rst $(wildcard slides/*)
 	mkdir -p build
 	cd $(dir $<) && pandoc \
 		-t beamer \
